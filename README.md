@@ -78,36 +78,50 @@ docker compose up
      postgres:16-alpine
    ```
 
-5. Run migrations:
-   ```bash
-   psql $DATABASE_URL -f db/migrations/001_init.sql
-   ```
 
-## Environment Variables
+## Deployment
 
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | Postgres connection string |
-| `AUTH0_DOMAIN` | Auth0 tenant domain |
-| `AUTH0_CLIENT_ID` | Auth0 app client ID |
-| `AUTH0_CLIENT_SECRET` | Auth0 app client secret |
-| `AUTH0_CALLBACK_URL` | OAuth callback URL |
-| `SESSION_SECRET` | 32-byte hex string for cookie signing |
-| `COOKIE_DOMAIN` | Domain for session cookie |
-| `ALLOWED_USERS` | Comma-separated GitHub usernames |
-| `ALLOWED_MACHINES` | Comma-separated machine client IDs |
-| `AWS_REGION` | AWS region for SQS |
-| `SQS_QUEUE_URL` | SQS queue URL for task dispatch |
-| `PORT` | API server port (default: 8080) |
-| `CORS_ORIGIN` | Allowed CORS origin |
-
-## Development
+### Quick Start (Local Testing)
 
 ```bash
-make dev          # Start all services
-make test         # Run Go tests
-make sqlc         # Regenerate sqlc code
-make lint         # Lint Go + TypeScript
-make migrate      # Run DB migrations
-make clean        # Tear down containers and volumes
+cp .env.example .env
+# Edit .env with Auth0 credentials
+docker compose up
+# Frontend: http://localhost:5173
+# API: http://localhost:8080
+```
+
+### Production Deployment
+
+Full automation via GitHub Actions:
+
+1. **Feature branch** → GitHub CI runs (lint, test, build)
+2. **Merge to `main`** → Auto-deploys to `tasks.kwstnr.ch`
+3. **Git tag** (v*) → Tags image, deploys with version number
+
+**Setup required:**
+- [Auth0 free tier](https://auth0.com) with GitHub connection
+- Hetzner VPS with Docker
+- GitHub secrets: `DEPLOY_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for full setup guide.
+
+### Workflow
+
+```bash
+# Feature work
+git checkout -b feat/my-feature
+# ... make changes ...
+git push origin feat/my-feature
+# → GitHub CI runs on PR
+
+# Merge
+git checkout main
+git merge feat/my-feature
+git push origin main
+# → CI passes, auto-deploys in ~5-10 min
+
+# Or release
+make release v=1.0.0
+# → Tags and deploys with version number
 ```
