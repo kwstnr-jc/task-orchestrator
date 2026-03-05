@@ -1,0 +1,37 @@
+# Production compose — used on Hetzner VPS
+# Usage: docker compose -f docker-compose.prod.yml up -d
+
+services:
+  orchestrator:
+    image: ghcr.io/kwstnr-jc/task-orchestrator:latest
+    container_name: orchestrator
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - app-data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # Optional: Watchtower for auto-pull on image update
+  # Watches for new GHCR images and restarts the container
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.docker/config.json:/config.json:ro
+    command: --interval 60 --cleanup --label-enable
+    environment:
+      WATCHTOWER_NOTIFICATION_URL: ""
+
+volumes:
+  app-data:
