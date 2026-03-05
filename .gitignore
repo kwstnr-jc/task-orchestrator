@@ -1,0 +1,24 @@
+# Go
+api/task-orchestrator
+api/tmp/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# sqlc generated
+api/db/sqlc/
+
+# Air
+tmp/
