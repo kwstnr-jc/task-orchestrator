@@ -44,6 +44,9 @@ func main() {
 	r.Use(middleware.SecureHeaders)
 	r.Use(middleware.CORS(cfg.CORSOrigin))
 
+	// Health check (unauthenticated, for deployment verification)
+	r.Get("/api/health", handler.HealthCheck)
+
 	// Public auth routes
 	r.Route("/api/auth", func(r chi.Router) {
 		r.Get("/login", authHandler.LoginRedirect)
