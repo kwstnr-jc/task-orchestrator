@@ -76,7 +76,6 @@ func (s *Store) ListTasks(ctx context.Context, params ListTasksParams) ([]Task, 
 	if params.ProjectID != nil {
 		query += fmt.Sprintf(" AND project_id = $%d", argIdx)
 		args = append(args, *params.ProjectID)
-		argIdx++
 	}
 	query += " ORDER BY priority DESC, created_at DESC"
 
