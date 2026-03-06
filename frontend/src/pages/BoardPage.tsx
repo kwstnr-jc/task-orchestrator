@@ -3,9 +3,9 @@ import {
   DragDropContext,
   type DropResult,
 } from "@hello-pangea/dnd";
-import type { Task, TaskType, UserInfo } from "../types/task";
+import type { Project, Task, TaskType, UserInfo } from "../types/task";
 import { DEV_STATES, RESEARCH_STATES } from "../types/task";
-import { getTasks, updateTask } from "../lib/api";
+import { getTasks, getProjects, updateTask, createProject } from "../lib/api";
 import Column from "../components/Column";
 import CreateTaskForm from "../components/CreateTaskForm";
 
@@ -16,12 +16,27 @@ interface BoardPageProps {
 
 export default function BoardPage({ user, onLogout }: BoardPageProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [activeType, setActiveType] = useState<TaskType>("dev");
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [showNewProject, setShowNewProject] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+
+  const loadProjects = useCallback(() => {
+    getProjects().then(setProjects).catch(console.error);
+  }, []);
 
   const loadTasks = useCallback(() => {
-    getTasks({ type: activeType }).then(setTasks).catch(console.error);
-  }, [activeType]);
+    getTasks({ 
+      type: activeType,
+      project_id: selectedProject || undefined
+    }).then(setTasks).catch(console.error);
+  }, [activeType, selectedProject]);
+
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
 
   useEffect(() => {
     loadTasks();
@@ -37,7 +52,6 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
     const task = tasks.find((t) => t.id === draggableId);
     if (!task || task.state === newState) return;
 
-    // Optimistic update
     setTasks((prev) =>
       prev.map((t) =>
         t.id === draggableId ? { ...t, state: newState as Task["state"] } : t
@@ -47,7 +61,19 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
     try {
       await updateTask(draggableId, { state: newState as Task["state"] });
     } catch {
-      loadTasks(); // Revert on error
+      loadTasks();
+    }
+  };
+
+  const handleCreateProject = async () => {
+    if (!newProjectName.trim()) return;
+    try {
+      await createProject({ name: newProjectName });
+      setNewProjectName("");
+      setShowNewProject(false);
+      loadProjects();
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -62,6 +88,30 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
       <header className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <h1 className="text-xl font-bold">Task Orchestrator</h1>
+          
+          {/* Project Selector */}
+          <select
+            value={selectedProject || ""}
+            onChange={(e) => setSelectedProject(e.target.value || null)}
+            className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-gray-800 transition-colors"
+          >
+            <option value="">All Projects</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={() => setShowNewProject(true)}
+            className="text-gray-500 hover:text-gray-300 text-sm transition-colors"
+            title="New project"
+          >
+            ⊕ Project
+          </button>
+
+          {/* Task Type Toggle */}
           <div className="flex gap-1 bg-gray-900 rounded-lg p-1">
             <button
               onClick={() => setActiveType("dev")}
@@ -85,6 +135,7 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
             </button>
           </div>
         </div>
+
         <div className="flex items-center gap-4">
           <button
             onClick={() => setShowCreate(true)}
@@ -111,6 +162,7 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
                 key={state}
                 state={state}
                 tasks={tasks.filter((t) => t.state === state)}
+                projects={projects}
                 onRefresh={loadTasks}
               />
             ))}
@@ -122,12 +174,49 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
       {showCreate && (
         <CreateTaskForm
           taskType={activeType}
+          projects={projects}
+          selectedProject={selectedProject}
           onClose={() => setShowCreate(false)}
           onCreated={() => {
             setShowCreate(false);
             loadTasks();
           }}
         />
+      )}
+
+      {/* Create Project Modal */}
+      {showNewProject && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-96 shadow-xl">
+            <h2 className="text-lg font-bold mb-4">New Project</h2>
+            <input
+              type="text"
+              value={newProjectName}
+              onChange={(e) => setNewProjectName(e.target.value)}
+              placeholder="Project name"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white mb-4 focus:outline-none focus:border-blue-500"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleCreateProject();
+                if (e.key === "Escape") setShowNewProject(false);
+              }}
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowNewProject(false)}
+                className="px-4 py-2 rounded-lg text-sm text-gray-400 hover:text-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateProject}
+                className="px-4 py-2 rounded-lg text-sm bg-blue-600 hover:bg-blue-500 text-white transition-colors"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -1,6 +1,16 @@
 export type TaskType = "dev" | "research";
 export type TaskState = "draft" | "refine" | "approved" | "in_progress" | "done";
 
+export interface Project {
+  id: string;
+  name: string;
+  description: string | null;
+  color: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -9,6 +19,7 @@ export interface Task {
   state: TaskState;
   priority: number;
   metadata: Record<string, unknown>;
+  project_id: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;

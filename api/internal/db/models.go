@@ -68,9 +68,20 @@ type Task struct {
 	State       TaskState       `json:"state"`
 	Priority    int32           `json:"priority"`
 	Metadata    json.RawMessage `json:"metadata"`
+	ProjectID   *uuid.UUID      `json:"project_id"`
 	CreatedBy   string          `json:"created_by"`
 	CreatedAt   time.Time       `json:"created_at"`
 	UpdatedAt   time.Time       `json:"updated_at"`
+}
+
+type Project struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description *string   `json:"description"`
+	Color       string    `json:"color"`
+	CreatedBy   string    `json:"created_by"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type User struct {

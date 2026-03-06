@@ -1,4 +1,4 @@
-import type { Task, TaskState, TaskType, UserInfo } from "../types/task";
+import type { Project, Task, TaskState, TaskType, UserInfo } from "../types/task";
 
 const BASE = "/api";
 
@@ -32,10 +32,12 @@ export function getMe(): Promise<UserInfo> {
 export function getTasks(params?: {
   type?: TaskType;
   state?: TaskState;
+  project_id?: string;
 }): Promise<Task[]> {
   const query = new URLSearchParams();
   if (params?.type) query.set("type", params.type);
   if (params?.state) query.set("state", params.state);
+  if (params?.project_id) query.set("project_id", params.project_id);
   const qs = query.toString();
   return request(`/tasks${qs ? `?${qs}` : ""}`);
 }
@@ -45,6 +47,7 @@ export function createTask(data: {
   description?: string;
   task_type: TaskType;
   priority?: number;
+  project_id?: string;
 }): Promise<Task> {
   return request("/tasks", {
     method: "POST",
@@ -54,7 +57,13 @@ export function createTask(data: {
 
 export function updateTask(
   id: string,
-  data: { title?: string; description?: string; state?: TaskState; priority?: number }
+  data: {
+    title?: string;
+    description?: string;
+    state?: TaskState;
+    priority?: number;
+    project_id?: string | null;
+  }
 ): Promise<Task> {
   return request(`/tasks/${id}`, {
     method: "PUT",
@@ -68,4 +77,43 @@ export function deleteTask(id: string): Promise<void> {
 
 export function enqueueTask(id: string): Promise<{ status: string; task_id: string }> {
   return request(`/tasks/${id}/enqueue`, { method: "POST" });
+}
+
+// Projects
+
+export function getProjects(): Promise<Project[]> {
+  return request("/projects");
+}
+
+export function getProject(id: string): Promise<Project> {
+  return request(`/projects/${id}`);
+}
+
+export function createProject(data: {
+  name: string;
+  description?: string;
+  color?: string;
+}): Promise<Project> {
+  return request("/projects", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateProject(
+  id: string,
+  data: {
+    name?: string;
+    description?: string;
+    color?: string;
+  }
+): Promise<Project> {
+  return request(`/projects/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteProject(id: string): Promise<void> {
+  return request(`/projects/${id}`, { method: "DELETE" });
 }

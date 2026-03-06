@@ -30,6 +30,12 @@ func (h *TaskHandler) List(w http.ResponseWriter, r *http.Request) {
 		st := db.TaskState(s)
 		params.State = &st
 	}
+	if p := r.URL.Query().Get("project_id"); p != "" {
+		pid, err := uuid.Parse(p)
+		if err == nil {
+			params.ProjectID = &pid
+		}
+	}
 
 	tasks, err := h.store.ListTasks(r.Context(), params)
 	if err != nil {

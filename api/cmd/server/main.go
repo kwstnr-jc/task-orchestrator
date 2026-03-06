@@ -33,6 +33,7 @@ func main() {
 	store := db.NewStore(pool)
 	authHandler := auth.NewHandler(cfg)
 	taskHandler := handler.NewTaskHandler(store)
+	projectHandler := handler.NewProjectHandler(store)
 	enqueueHandler := handler.NewEnqueueHandler(store, cfg)
 
 	r := chi.NewRouter()
@@ -56,6 +57,16 @@ func main() {
 	})
 
 	// Protected task routes
+	// Protected project routes
+	r.Route("/api/projects", func(r chi.Router) {
+		r.Use(authHandler.AuthMiddleware)
+		r.Get("/", projectHandler.List)
+		r.Post("/", projectHandler.Create)
+		r.Get("/{id}", projectHandler.Get)
+		r.Put("/{id}", projectHandler.Update)
+		r.Delete("/{id}", projectHandler.Delete)
+	})
+
 	r.Route("/api/tasks", func(r chi.Router) {
 		r.Use(authHandler.AuthMiddleware)
 		r.Get("/", taskHandler.List)
