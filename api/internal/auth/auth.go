@@ -162,7 +162,7 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"status": "logged_out"})
+	_ = json.NewEncoder(w).Encode(map[string]string{"status": "logged_out"})
 }
 
 func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
@@ -172,7 +172,7 @@ func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	_ = json.NewEncoder(w).Encode(user)
 }
 
 func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
@@ -290,6 +290,6 @@ func UserFromContext(ctx context.Context) (UserInfo, bool) {
 
 func generateSessionID() string {
 	b := make([]byte, 32)
-	rand.Read(b)
+	_, _ = rand.Read(b)
 	return hex.EncodeToString(b)
 }
