@@ -2,7 +2,7 @@
 FROM golang:1.23-alpine AS dev
 RUN go install github.com/air-verse/air@latest
 WORKDIR /app
-COPY api/go.mod api/go.sum ./api/
+COPY api/go.mod ./api/
 RUN cd api && go mod download
 COPY api/ ./api/
 COPY .air.toml .
@@ -11,7 +11,7 @@ CMD ["air", "-c", ".air.toml"]
 # ── Build Go API ──────────────────────────────────────────
 FROM golang:1.23-alpine AS api-build
 WORKDIR /app
-COPY api/go.mod api/go.sum ./api/
+COPY api/go.mod ./api/
 RUN cd api && go mod download
 COPY api/ ./api/
 RUN cd api && CGO_ENABLED=0 go build -o /bin/server ./cmd/server
