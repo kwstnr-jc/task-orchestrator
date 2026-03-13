@@ -129,7 +129,7 @@ func (h *Handler) Callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.store.UpsertUser(r.Context(), userInfo.Nickname, &userInfo.Name)
+	_, _ = h.store.UpsertUser(r.Context(), userInfo.Nickname, &userInfo.Name)
 
 	sessionID := generateSessionID()
 	h.mu.Lock()
@@ -198,7 +198,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 		// Dev mode: bypass auth entirely
 		if h.cfg.DevMode {
 			displayName := "Dev User"
-			h.store.UpsertUser(r.Context(), "dev", &displayName)
+			_, _ = h.store.UpsertUser(r.Context(), "dev", &displayName)
 			ctx := context.WithValue(r.Context(), UserKey, UserInfo{
 				Username:    "dev",
 				DisplayName: "Dev User",

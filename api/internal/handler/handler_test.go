@@ -176,7 +176,7 @@ func TestTaskList(t *testing.T) {
 	}
 
 	var tasks []db.Task
-	json.Unmarshal(w.Body.Bytes(), &tasks)
+	_ = json.Unmarshal(w.Body.Bytes(), &tasks)
 	if len(tasks) != 2 {
 		t.Fatalf("expected 2 tasks, got %d", len(tasks))
 	}
@@ -404,7 +404,7 @@ func TestProjectList(t *testing.T) {
 	}
 
 	var projects []db.Project
-	json.Unmarshal(w.Body.Bytes(), &projects)
+	_ = json.Unmarshal(w.Body.Bytes(), &projects)
 	if len(projects) != 1 {
 		t.Fatalf("expected 1 project, got %d", len(projects))
 	}
