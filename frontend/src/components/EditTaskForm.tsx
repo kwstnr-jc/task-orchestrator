@@ -75,8 +75,8 @@ export default function EditTaskForm({
 
   if (showDeleteConfirm) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end md:items-center justify-center z-50 md:p-4">
-        <div className="bg-gray-900 border border-gray-800 rounded-t-2xl md:rounded-lg p-6 w-full max-w-96 shadow-xl">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end lg:items-center justify-center z-50 lg:p-4">
+        <div className="bg-gray-900 border border-gray-800 rounded-t-2xl lg:rounded-lg p-6 w-full max-w-96 shadow-xl">
           <h2 className="text-lg font-bold mb-2">Delete Task</h2>
           <p className="text-gray-400 text-sm mb-6">
             Are you sure you want to delete{" "}
@@ -104,8 +104,8 @@ export default function EditTaskForm({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end md:items-center justify-center z-50 md:p-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-t-2xl md:rounded-lg p-6 w-full max-w-96 shadow-xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end lg:items-center justify-center z-50 lg:p-4">
+      <div className="bg-gray-900 border border-gray-800 rounded-t-2xl lg:rounded-lg p-6 w-full max-w-96 shadow-xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-lg font-bold mb-4">Edit Task</h2>
 
         {/* State indicator + move buttons */}
