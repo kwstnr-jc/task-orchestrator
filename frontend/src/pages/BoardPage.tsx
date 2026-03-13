@@ -21,6 +21,7 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [showNewProject, setShowNewProject] = useState(false);
+  const [showDeleteProject, setShowDeleteProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
 
   const loadProjects = useCallback(() => {
@@ -67,11 +68,10 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
 
   const handleDeleteProject = async () => {
     if (!selectedProject) return;
-    const project = projects.find((p) => p.id === selectedProject);
-    if (!confirm(`Delete project "${project?.name}"? Tasks in this project will be unlinked.`)) return;
     try {
       await deleteProject(selectedProject);
       setSelectedProject(null);
+      setShowDeleteProject(false);
       loadProjects();
       loadTasks();
     } catch (err) {
@@ -127,7 +127,7 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
 
           {selectedProject && (
             <button
-              onClick={handleDeleteProject}
+              onClick={() => setShowDeleteProject(true)}
               className="text-red-500 hover:text-red-400 text-sm transition-colors"
               title="Delete selected project"
             >
@@ -237,6 +237,36 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
                 className="px-4 py-2 rounded-lg text-sm bg-blue-600 hover:bg-blue-500 text-white transition-colors"
               >
                 Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Project Confirmation Modal */}
+      {showDeleteProject && selectedProject && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-96 shadow-xl">
+            <h2 className="text-lg font-bold mb-2">Delete Project</h2>
+            <p className="text-gray-400 text-sm mb-6">
+              Are you sure you want to delete{" "}
+              <span className="text-white font-medium">
+                {projects.find((p) => p.id === selectedProject)?.name}
+              </span>
+              ? All tasks in this project will also be deleted.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowDeleteProject(false)}
+                className="px-4 py-2 rounded-lg text-sm text-gray-400 hover:text-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteProject}
+                className="px-4 py-2 rounded-lg text-sm bg-red-600 hover:bg-red-500 text-white transition-colors"
+              >
+                Delete
               </button>
             </div>
           </div>
