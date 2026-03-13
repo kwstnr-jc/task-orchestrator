@@ -166,6 +166,15 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
+	if h.cfg.DevMode {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(UserInfo{
+			Username:    "dev",
+			DisplayName: "Dev User",
+			Source:      "dev",
+		})
+		return
+	}
 	user, ok := UserFromContext(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -177,6 +186,17 @@ func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Dev mode: bypass auth entirely
+		if h.cfg.DevMode {
+			ctx := context.WithValue(r.Context(), UserKey, UserInfo{
+				Username:    "dev",
+				DisplayName: "Dev User",
+				Source:      "dev",
+			})
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+
 		// Try cookie auth first (SPA users)
 		if cookie, err := r.Cookie("session"); err == nil {
 			h.mu.RLock()

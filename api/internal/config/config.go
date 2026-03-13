@@ -19,6 +19,7 @@ type Config struct {
 	SQSQueueURL     string
 	AWSRegion       string
 	CORSOrigin      string
+	DevMode         bool
 }
 
 func Load() *Config {
@@ -36,6 +37,7 @@ func Load() *Config {
 		SQSQueueURL:     os.Getenv("SQS_QUEUE_URL"),
 		AWSRegion:       envOr("AWS_REGION", "eu-central-1"),
 		CORSOrigin:      envOr("CORS_ORIGIN", "http://localhost:5173"),
+		DevMode:         os.Getenv("DEV_MODE") == "true",
 	}
 }
 
