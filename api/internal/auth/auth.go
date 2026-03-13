@@ -35,12 +35,12 @@ type sessionData struct {
 
 type Handler struct {
 	cfg      *config.Config
-	store    *db.Store
+	store    db.UserStore
 	mu       sync.RWMutex
 	sessions map[string]sessionData
 }
 
-func NewHandler(cfg *config.Config, store *db.Store) *Handler {
+func NewHandler(cfg *config.Config, store db.UserStore) *Handler {
 	return &Handler{
 		cfg:      cfg,
 		store:    store,
