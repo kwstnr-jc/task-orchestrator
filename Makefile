@@ -1,4 +1,4 @@
-.PHONY: dev build test migrate sqlc lint clean deploy
+.PHONY: dev build test test-api test-frontend migrate lint clean deploy
 
 # ── Development ───────────────────────────────────────
 dev:
@@ -13,6 +13,13 @@ dev-frontend:
 # ── Quality ───────────────────────────────────────────
 test:
 	cd api && go test -race ./...
+	cd frontend && npm test
+
+test-api:
+	cd api && go test -race -v ./...
+
+test-frontend:
+	cd frontend && npm test
 
 lint:
 	cd api && go vet ./...
@@ -32,9 +39,6 @@ build-frontend:
 # ── Database ──────────────────────────────────────────
 migrate:
 	psql "$(DATABASE_URL)" -f db/migrations/001_init.sql
-
-sqlc:
-	cd api && sqlc generate
 
 # ── Deployment ────────────────────────────────────────
 deploy: build

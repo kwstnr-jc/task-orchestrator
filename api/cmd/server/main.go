@@ -31,7 +31,7 @@ func main() {
 	defer pool.Close()
 
 	store := db.NewStore(pool)
-	authHandler := auth.NewHandler(cfg)
+	authHandler := auth.NewHandler(cfg, store)
 	taskHandler := handler.NewTaskHandler(store)
 	projectHandler := handler.NewProjectHandler(store)
 	enqueueHandler := handler.NewEnqueueHandler(store, cfg)

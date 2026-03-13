@@ -13,10 +13,10 @@ import (
 )
 
 type TaskHandler struct {
-	store *db.Store
+	store db.TaskStore
 }
 
-func NewTaskHandler(store *db.Store) *TaskHandler {
+func NewTaskHandler(store db.TaskStore) *TaskHandler {
 	return &TaskHandler{store: store}
 }
 

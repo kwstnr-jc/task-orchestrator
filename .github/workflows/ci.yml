@@ -47,11 +47,11 @@ jobs:
       - name: Install
         run: cd frontend && npm ci
 
-      - name: Lint
-        run: cd frontend && npx eslint src/ || true
-
       - name: Type check
         run: cd frontend && npx tsc --noEmit
+
+      - name: Test
+        run: cd frontend && npm test
 
       - name: Build
         run: cd frontend && npm run build

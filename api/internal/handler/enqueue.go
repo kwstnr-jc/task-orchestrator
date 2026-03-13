@@ -16,12 +16,12 @@ import (
 )
 
 type EnqueueHandler struct {
-	store    *db.Store
+	store    db.TaskStore
 	sqsURL   string
 	sqsClient *sqs.Client
 }
 
-func NewEnqueueHandler(store *db.Store, cfg *config.Config) *EnqueueHandler {
+func NewEnqueueHandler(store db.TaskStore, cfg *config.Config) *EnqueueHandler {
 	h := &EnqueueHandler{
 		store:  store,
 		sqsURL: cfg.SQSQueueURL,

@@ -13,10 +13,10 @@ import (
 )
 
 type ProjectHandler struct {
-	store *db.Store
+	store db.ProjectStore
 }
 
-func NewProjectHandler(store *db.Store) *ProjectHandler {
+func NewProjectHandler(store db.ProjectStore) *ProjectHandler {
 	return &ProjectHandler{store: store}
 }
 
