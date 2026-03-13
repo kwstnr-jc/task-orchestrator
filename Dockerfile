@@ -1,6 +1,6 @@
 # ── Dev stage (used by docker compose) ────────────────────
 FROM golang:1.24-alpine AS dev
-RUN go install github.com/air-verse/air@latest
+RUN go install github.com/air-verse/air@v1.64.4
 WORKDIR /app
 COPY api/go.mod api/go.sum ./api/
 RUN cd api && go mod download
