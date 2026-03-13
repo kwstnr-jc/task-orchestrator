@@ -8,6 +8,7 @@ import { DEV_STATES, RESEARCH_STATES } from "../types/task";
 import { getTasks, getProjects, updateTask, createProject, deleteProject } from "../lib/api";
 import Column from "../components/Column";
 import CreateTaskForm from "../components/CreateTaskForm";
+import EditTaskForm from "../components/EditTaskForm";
 
 interface BoardPageProps {
   user: UserInfo;
@@ -20,6 +21,7 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
   const [activeType, setActiveType] = useState<TaskType>("dev");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [showNewProject, setShowNewProject] = useState(false);
   const [showDeleteProject, setShowDeleteProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
@@ -187,12 +189,25 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
                 state={state}
                 tasks={tasks.filter((t) => t.state === state)}
                 projects={projects}
-                onRefresh={loadTasks}
+                onEdit={setEditingTask}
               />
             ))}
           </div>
         </DragDropContext>
       </div>
+
+      {/* Edit Task Modal */}
+      {editingTask && (
+        <EditTaskForm
+          task={editingTask}
+          projects={projects}
+          onClose={() => setEditingTask(null)}
+          onUpdated={() => {
+            setEditingTask(null);
+            loadTasks();
+          }}
+        />
+      )}
 
       {/* Create Task Modal */}
       {showCreate && (

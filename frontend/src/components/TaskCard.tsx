@@ -1,33 +1,22 @@
 import type { Project, Task } from "../types/task";
-import { deleteTask } from "../lib/api";
 
 interface TaskCardProps {
   task: Task;
   project?: Project;
   isDragging: boolean;
-  onRefresh: () => void;
+  onEdit: (task: Task) => void;
 }
 
 export default function TaskCard({
   task,
   project,
   isDragging,
-  onRefresh,
+  onEdit,
 }: TaskCardProps) {
-  const handleDelete = async () => {
-    if (confirm("Delete this task?")) {
-      try {
-        await deleteTask(task.id);
-        onRefresh();
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  };
-
   return (
     <div
-      className={`p-3 rounded-lg border transition-all ${
+      onClick={() => onEdit(task)}
+      className={`p-3 rounded-lg border transition-all cursor-pointer ${
         isDragging
           ? "border-blue-500 bg-gray-800 shadow-lg"
           : "border-gray-700 bg-gray-800 hover:border-gray-600"
@@ -57,13 +46,6 @@ export default function TaskCard({
             </span>
           </div>
         </div>
-        <button
-          onClick={handleDelete}
-          className="text-gray-500 hover:text-red-400 transition-colors flex-shrink-0"
-          title="Delete task"
-        >
-          ✕
-        </button>
       </div>
     </div>
   );

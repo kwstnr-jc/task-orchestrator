@@ -7,10 +7,10 @@ interface ColumnProps {
   state: TaskState;
   tasks: Task[];
   projects: Project[];
-  onRefresh: () => void;
+  onEdit: (task: Task) => void;
 }
 
-export default function Column({ state, tasks, projects, onRefresh }: ColumnProps) {
+export default function Column({ state, tasks, projects, onEdit }: ColumnProps) {
   return (
     <Droppable droppableId={state}>
       {(provided, snapshot) => (
@@ -40,7 +40,7 @@ export default function Column({ state, tasks, projects, onRefresh }: ColumnProp
                       task={task}
                       project={projects.find((p) => p.id === task.project_id)}
                       isDragging={snapshot.isDragging}
-                      onRefresh={onRefresh}
+                      onEdit={onEdit}
                     />
                   </div>
                 )}
