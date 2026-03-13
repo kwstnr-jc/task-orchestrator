@@ -5,7 +5,7 @@ import {
 } from "@hello-pangea/dnd";
 import type { Project, Task, TaskType, UserInfo } from "../types/task";
 import { DEV_STATES, RESEARCH_STATES } from "../types/task";
-import { getTasks, getProjects, updateTask, createProject } from "../lib/api";
+import { getTasks, getProjects, updateTask, createProject, deleteProject } from "../lib/api";
 import Column from "../components/Column";
 import CreateTaskForm from "../components/CreateTaskForm";
 
@@ -65,6 +65,20 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
     }
   };
 
+  const handleDeleteProject = async () => {
+    if (!selectedProject) return;
+    const project = projects.find((p) => p.id === selectedProject);
+    if (!confirm(`Delete project "${project?.name}"? Tasks in this project will be unlinked.`)) return;
+    try {
+      await deleteProject(selectedProject);
+      setSelectedProject(null);
+      loadProjects();
+      loadTasks();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleCreateProject = async () => {
     if (!newProjectName.trim()) return;
     try {
@@ -108,8 +122,18 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
             className="text-gray-500 hover:text-gray-300 text-sm transition-colors"
             title="New project"
           >
-            ⊕ Project
+            + Project
           </button>
+
+          {selectedProject && (
+            <button
+              onClick={handleDeleteProject}
+              className="text-red-500 hover:text-red-400 text-sm transition-colors"
+              title="Delete selected project"
+            >
+              Delete Project
+            </button>
+          )}
 
           {/* Task Type Toggle */}
           <div className="flex gap-1 bg-gray-900 rounded-lg p-1">
