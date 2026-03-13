@@ -45,8 +45,8 @@ export default function CreateTaskForm({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-96 shadow-xl">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end md:items-center justify-center z-50 md:p-4">
+      <div className="bg-gray-900 border border-gray-800 rounded-t-2xl md:rounded-lg p-6 w-full max-w-96 shadow-xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-lg font-bold mb-4">New {taskType === "dev" ? "Dev" : "Research"} Task</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">

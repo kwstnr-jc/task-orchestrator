@@ -1,10 +1,12 @@
 import { useState } from "react";
-import type { Project, Task } from "../types/task";
+import type { Project, Task, TaskState } from "../types/task";
+import { STATE_LABELS } from "../types/task";
 import { updateTask, deleteTask } from "../lib/api";
 
 interface EditTaskFormProps {
   task: Task;
   projects: Project[];
+  states: TaskState[];
   onClose: () => void;
   onUpdated: () => void;
 }
@@ -12,6 +14,7 @@ interface EditTaskFormProps {
 export default function EditTaskForm({
   task,
   projects,
+  states,
   onClose,
   onUpdated,
 }: EditTaskFormProps) {
@@ -21,6 +24,10 @@ export default function EditTaskForm({
   const [projectId, setProjectId] = useState(task.project_id || "");
   const [loading, setLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const currentIdx = states.indexOf(task.state);
+  const prevState = currentIdx > 0 ? states[currentIdx - 1] : null;
+  const nextState = currentIdx < states.length - 1 ? states[currentIdx + 1] : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +41,18 @@ export default function EditTaskForm({
         priority: Number(priority),
         project_id: projectId || null,
       });
+      onUpdated();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStateChange = async (newState: TaskState) => {
+    setLoading(true);
+    try {
+      await updateTask(task.id, { state: newState });
       onUpdated();
     } catch (err) {
       console.error(err);
@@ -56,8 +75,8 @@ export default function EditTaskForm({
 
   if (showDeleteConfirm) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-96 shadow-xl">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end md:items-center justify-center z-50 md:p-4">
+        <div className="bg-gray-900 border border-gray-800 rounded-t-2xl md:rounded-lg p-6 w-full max-w-96 shadow-xl">
           <h2 className="text-lg font-bold mb-2">Delete Task</h2>
           <p className="text-gray-400 text-sm mb-6">
             Are you sure you want to delete{" "}
@@ -85,9 +104,32 @@ export default function EditTaskForm({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-96 shadow-xl">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end md:items-center justify-center z-50 md:p-4">
+      <div className="bg-gray-900 border border-gray-800 rounded-t-2xl md:rounded-lg p-6 w-full max-w-96 shadow-xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-lg font-bold mb-4">Edit Task</h2>
+
+        {/* State indicator + move buttons */}
+        <div className="flex items-center gap-2 mb-4">
+          <button
+            onClick={() => prevState && handleStateChange(prevState)}
+            disabled={!prevState || loading}
+            className="px-2 py-1 rounded text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+            title={prevState ? `Move to ${STATE_LABELS[prevState]}` : undefined}
+          >
+            &larr;
+          </button>
+          <span className="flex-1 text-center text-sm font-medium text-gray-300 bg-gray-800 rounded-lg py-1.5">
+            {STATE_LABELS[task.state]}
+          </span>
+          <button
+            onClick={() => nextState && handleStateChange(nextState)}
+            disabled={!nextState || loading}
+            className="px-2 py-1 rounded text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+            title={nextState ? `Move to ${STATE_LABELS[nextState]}` : undefined}
+          >
+            &rarr;
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

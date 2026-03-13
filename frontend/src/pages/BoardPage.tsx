@@ -3,8 +3,8 @@ import {
   DragDropContext,
   type DropResult,
 } from "@hello-pangea/dnd";
-import type { Project, Task, TaskType, UserInfo } from "../types/task";
-import { DEV_STATES, RESEARCH_STATES } from "../types/task";
+import type { Project, Task, TaskState, TaskType, UserInfo } from "../types/task";
+import { DEV_STATES, RESEARCH_STATES, STATE_LABELS } from "../types/task";
 import { getTasks, getProjects, updateTask, createProject, deleteProject } from "../lib/api";
 import Column from "../components/Column";
 import CreateTaskForm from "../components/CreateTaskForm";
@@ -25,13 +25,14 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
   const [showNewProject, setShowNewProject] = useState(false);
   const [showDeleteProject, setShowDeleteProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
+  const [mobileColumn, setMobileColumn] = useState<TaskState>("draft");
 
   const loadProjects = useCallback(() => {
     getProjects().then(setProjects).catch(console.error);
   }, []);
 
   const loadTasks = useCallback(() => {
-    getTasks({ 
+    getTasks({
       type: activeType,
       project_id: selectedProject || undefined
     }).then(setTasks).catch(console.error);
@@ -46,6 +47,13 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
   }, [loadTasks]);
 
   const states = activeType === "dev" ? DEV_STATES : RESEARCH_STATES;
+
+  // Reset mobile column when switching type if current column doesn't exist
+  useEffect(() => {
+    if (!states.includes(mobileColumn)) {
+      setMobileColumn(states[0]);
+    }
+  }, [states, mobileColumn]);
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
@@ -101,15 +109,34 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <h1 className="text-xl font-bold">Task Orchestrator</h1>
-          
+      <header className="border-b border-gray-800 px-4 py-3 md:px-6 md:py-4">
+        {/* Top row */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg md:text-xl font-bold">Task Orchestrator</h1>
+          <div className="flex items-center gap-2 md:gap-4">
+            <button
+              onClick={() => setShowCreate(true)}
+              className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              + New Task
+            </button>
+            <span className="text-sm text-gray-400 hidden md:inline">{user.username}</span>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-gray-500 hover:text-gray-300 transition-colors hidden md:inline"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+
+        {/* Controls row */}
+        <div className="flex items-center gap-2 md:gap-4 mt-3 flex-wrap">
           {/* Project Selector */}
           <select
             value={selectedProject || ""}
             onChange={(e) => setSelectedProject(e.target.value || null)}
-            className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-gray-800 transition-colors"
+            className="bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 md:px-3 md:py-2 text-sm text-gray-200 hover:bg-gray-800 transition-colors flex-1 md:flex-none min-w-0"
           >
             <option value="">All Projects</option>
             {projects.map((p) => (
@@ -121,7 +148,7 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
 
           <button
             onClick={() => setShowNewProject(true)}
-            className="text-gray-500 hover:text-gray-300 text-sm transition-colors"
+            className="text-gray-500 hover:text-gray-300 text-sm transition-colors whitespace-nowrap"
             title="New project"
           >
             + Project
@@ -130,15 +157,15 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
           {selectedProject && (
             <button
               onClick={() => setShowDeleteProject(true)}
-              className="text-red-500 hover:text-red-400 text-sm transition-colors"
+              className="text-red-500 hover:text-red-400 text-sm transition-colors whitespace-nowrap"
               title="Delete selected project"
             >
-              Delete Project
+              Delete
             </button>
           )}
 
           {/* Task Type Toggle */}
-          <div className="flex gap-1 bg-gray-900 rounded-lg p-1">
+          <div className="flex gap-1 bg-gray-900 rounded-lg p-1 ml-auto">
             <button
               onClick={() => setActiveType("dev")}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
@@ -161,28 +188,51 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
             </button>
           </div>
         </div>
-
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setShowCreate(true)}
-            className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-          >
-            + New Task
-          </button>
-          <span className="text-sm text-gray-400">{user.username}</span>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
-          >
-            Logout
-          </button>
-        </div>
       </header>
 
-      {/* Board */}
-      <div className="flex-1 p-6 overflow-x-auto">
+      {/* Mobile Column Tabs */}
+      <div className="md:hidden border-b border-gray-800 overflow-x-auto">
+        <div className="flex">
+          {states.map((state) => {
+            const count = tasks.filter((t) => t.state === state).length;
+            return (
+              <button
+                key={state}
+                onClick={() => setMobileColumn(state)}
+                className={`flex-shrink-0 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                  mobileColumn === state
+                    ? "border-blue-500 text-white"
+                    : "border-transparent text-gray-500 hover:text-gray-300"
+                }`}
+              >
+                {STATE_LABELS[state]}
+                {count > 0 && (
+                  <span className="ml-1.5 text-xs text-gray-500">
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Mobile: Single column view */}
+      <div className="md:hidden flex-1 p-4">
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="flex gap-4 min-h-[calc(100vh-8rem)]">
+          <Column
+            state={mobileColumn}
+            tasks={tasks.filter((t) => t.state === mobileColumn)}
+            projects={projects}
+            onEdit={setEditingTask}
+          />
+        </DragDropContext>
+      </div>
+
+      {/* Desktop: All columns */}
+      <div className="hidden md:block flex-1 p-6 overflow-x-auto">
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="flex gap-4 min-h-[calc(100vh-10rem)]">
             {states.map((state) => (
               <Column
                 key={state}
@@ -201,6 +251,7 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
         <EditTaskForm
           task={editingTask}
           projects={projects}
+          states={states}
           onClose={() => setEditingTask(null)}
           onUpdated={() => {
             setEditingTask(null);
@@ -225,8 +276,8 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
 
       {/* Create Project Modal */}
       {showNewProject && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-96 shadow-xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-full max-w-96 shadow-xl">
             <h2 className="text-lg font-bold mb-4">New Project</h2>
             <input
               type="text"
@@ -260,8 +311,8 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
 
       {/* Delete Project Confirmation Modal */}
       {showDeleteProject && selectedProject && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-96 shadow-xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-full max-w-96 shadow-xl">
             <h2 className="text-lg font-bold mb-2">Delete Project</h2>
             <p className="text-gray-400 text-sm mb-6">
               Are you sure you want to delete{" "}
