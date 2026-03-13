@@ -14,6 +14,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/kwstnr-jc/task-orchestrator/api/internal/config"
+	"github.com/kwstnr-jc/task-orchestrator/api/internal/db"
 )
 
 type contextKey string
@@ -34,13 +35,15 @@ type sessionData struct {
 
 type Handler struct {
 	cfg      *config.Config
+	store    *db.Store
 	mu       sync.RWMutex
 	sessions map[string]sessionData
 }
 
-func NewHandler(cfg *config.Config) *Handler {
+func NewHandler(cfg *config.Config, store *db.Store) *Handler {
 	return &Handler{
 		cfg:      cfg,
+		store:    store,
 		sessions: make(map[string]sessionData),
 	}
 }
@@ -126,6 +129,8 @@ func (h *Handler) Callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.store.UpsertUser(r.Context(), userInfo.Nickname, &userInfo.Name)
+
 	sessionID := generateSessionID()
 	h.mu.Lock()
 	h.sessions[sessionID] = sessionData{
@@ -192,6 +197,8 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Dev mode: bypass auth entirely
 		if h.cfg.DevMode {
+			displayName := "Dev User"
+			h.store.UpsertUser(r.Context(), "dev", &displayName)
 			ctx := context.WithValue(r.Context(), UserKey, UserInfo{
 				Username:    "dev",
 				DisplayName: "Dev User",
