@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Project, TaskType } from "../types/task";
 import { createTask } from "../lib/api";
+import Dropdown from "./Dropdown";
 
 interface CreateTaskFormProps {
   taskType: TaskType;
@@ -83,19 +84,16 @@ export default function CreateTaskForm({
             <label className="block text-sm font-medium text-gray-300 mb-1">
               Project
             </label>
-            <select
+            <Dropdown
               value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-200 focus:outline-none focus:border-blue-500"
+              onChange={setProjectId}
+              placeholder="No project"
               disabled={loading}
-            >
-              <option value="">No project</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: "", label: "No project" },
+                ...projects.map((p) => ({ value: p.id, label: p.name })),
+              ]}
+            />
           </div>
 
           <div>

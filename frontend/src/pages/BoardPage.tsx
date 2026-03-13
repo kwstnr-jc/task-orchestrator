@@ -9,6 +9,7 @@ import { getTasks, getProjects, updateTask, createProject, deleteProject } from 
 import Column from "../components/Column";
 import CreateTaskForm from "../components/CreateTaskForm";
 import EditTaskForm from "../components/EditTaskForm";
+import Dropdown from "../components/Dropdown";
 
 interface BoardPageProps {
   user: UserInfo;
@@ -133,18 +134,16 @@ export default function BoardPage({ user, onLogout }: BoardPageProps) {
         {/* Controls row */}
         <div className="flex items-center gap-2 lg:gap-4 mt-3 flex-wrap">
           {/* Project Selector */}
-          <select
+          <Dropdown
             value={selectedProject || ""}
-            onChange={(e) => setSelectedProject(e.target.value || null)}
-            className="bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 lg:px-3 lg:py-2 text-sm text-gray-200 hover:bg-gray-800 transition-colors flex-1 lg:flex-none min-w-0"
-          >
-            <option value="">All Projects</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setSelectedProject(v || null)}
+            placeholder="All Projects"
+            options={[
+              { value: "", label: "All Projects" },
+              ...projects.map((p) => ({ value: p.id, label: p.name })),
+            ]}
+            className="flex-1 lg:flex-none lg:w-48 min-w-0"
+          />
 
           <button
             onClick={() => setShowNewProject(true)}
