@@ -46,6 +46,10 @@ func NewHandler(cfg *config.Config) *Handler {
 }
 
 func (h *Handler) LoginRedirect(w http.ResponseWriter, r *http.Request) {
+	if h.cfg.DevMode {
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
 	authURL := fmt.Sprintf("https://%s/authorize?"+
 		"response_type=code&"+
 		"client_id=%s&"+
