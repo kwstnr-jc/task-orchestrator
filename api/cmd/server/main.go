@@ -125,7 +125,7 @@ func spaFileServer(dir string) http.Handler {
 			// SPA fallback: serve index.html for unknown routes
 			r.URL.Path = "/"
 		} else {
-			f.Close()
+			_ = f.Close()
 		}
 		fileServer.ServeHTTP(w, r)
 	})

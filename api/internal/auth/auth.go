@@ -99,7 +99,7 @@ func (h *Handler) Callback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to exchange code", http.StatusInternalServerError)
 		return
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var tokenResp auth0TokenResponse
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
@@ -116,7 +116,7 @@ func (h *Handler) Callback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to get user info", http.StatusInternalServerError)
 		return
 	}
-	defer uiResp.Body.Close()
+	defer func() { _ = uiResp.Body.Close() }()
 
 	var userInfo auth0UserInfo
 	if err := json.NewDecoder(uiResp.Body).Decode(&userInfo); err != nil {
