@@ -28,8 +28,10 @@ Migrations auto-run on API startup. No manual steps needed.
 ## Testing
 
 - Go handler tests use mock store interfaces (`TaskStore`, `ProjectStore`, `UserStore` in `api/internal/db/store.go`)
+- Migration and store integration tests use testcontainers (spins up a real Postgres in Docker)
 - Frontend tests use Vitest + React Testing Library
-- CI runs on PR to main: lint, test, type-check, build, Docker build
+- CI runs on PR to main: lint, test (unit + integration), type-check, build, Docker build
+- Integration tests are skipped with `-short` flag if needed
 
 ## Key Conventions
 
