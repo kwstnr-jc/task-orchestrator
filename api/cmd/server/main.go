@@ -30,6 +30,10 @@ func main() {
 	}
 	defer pool.Close()
 
+	if err := db.Migrate(ctx, pool); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
+
 	store := db.NewStore(pool)
 	authHandler := auth.NewHandler(cfg, store)
 	taskHandler := handler.NewTaskHandler(store)
@@ -121,7 +125,7 @@ func spaFileServer(dir string) http.Handler {
 			// SPA fallback: serve index.html for unknown routes
 			r.URL.Path = "/"
 		} else {
-			f.Close()
+			_ = f.Close()
 		}
 		fileServer.ServeHTTP(w, r)
 	})
