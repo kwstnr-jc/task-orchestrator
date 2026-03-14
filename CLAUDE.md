@@ -46,6 +46,8 @@ Or simply: `make lint && make test`
 
 This matches what CI runs — if it fails in CI, it should have been caught locally first.
 
+**After creating a PR:** monitor the CI pipeline and fix failures immediately before moving on. Alternatively, use `act` or similar to run the pipeline locally before pushing.
+
 ## Key Conventions
 
 - No ORM — raw SQL with pgx, queries in `api/internal/db/db.go`
