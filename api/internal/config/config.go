@@ -20,6 +20,7 @@ type Config struct {
 	AWSRegion       string
 	CORSOrigin      string
 	DevMode         bool
+	APIKey          string
 }
 
 func Load() *Config {
@@ -38,6 +39,7 @@ func Load() *Config {
 		AWSRegion:       envOr("AWS_REGION", "eu-central-1"),
 		CORSOrigin:      envOr("CORS_ORIGIN", "http://localhost:5173"),
 		DevMode:         os.Getenv("DEV_MODE") == "true",
+		APIKey:          os.Getenv("API_KEY"),
 	}
 }
 
