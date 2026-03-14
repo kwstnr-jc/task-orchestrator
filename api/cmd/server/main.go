@@ -30,6 +30,10 @@ func main() {
 	}
 	defer pool.Close()
 
+	if err := db.Migrate(ctx, pool); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
+
 	store := db.NewStore(pool)
 	authHandler := auth.NewHandler(cfg, store)
 	taskHandler := handler.NewTaskHandler(store)
