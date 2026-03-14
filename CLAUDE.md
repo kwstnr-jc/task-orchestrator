@@ -33,6 +33,19 @@ Migrations auto-run on API startup. No manual steps needed.
 - CI runs on PR to main: lint, test (unit + integration), type-check, build, Docker build
 - Integration tests are skipped with `-short` flag if needed
 
+## Before Pushing
+
+**All of the following must pass locally before committing/pushing:**
+
+```bash
+cd api && go vet ./... && go test -race ./...
+cd frontend && npx tsc --noEmit && npm test
+```
+
+Or simply: `make lint && make test`
+
+This matches what CI runs — if it fails in CI, it should have been caught locally first.
+
 ## Key Conventions
 
 - No ORM — raw SQL with pgx, queries in `api/internal/db/db.go`
