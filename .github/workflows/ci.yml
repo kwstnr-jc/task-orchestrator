@@ -25,7 +25,7 @@ jobs:
         uses: golangci/golangci-lint-action@v7
         with:
           working-directory: api
-          version: v2.1
+          version: latest
 
       - name: Test
         run: cd api && go test -race -coverprofile=coverage.out ./...
