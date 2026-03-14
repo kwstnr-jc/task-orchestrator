@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -229,10 +230,25 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 			}
 		}
 
-		// Try Bearer JWT (machine clients)
+		// Try Bearer token (API key or JWT)
 		authHeader := r.Header.Get("Authorization")
 		if strings.HasPrefix(authHeader, "Bearer ") {
 			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+
+			// Try static API key first (machine clients)
+			if h.cfg.APIKey != "" && subtle.ConstantTimeCompare([]byte(tokenStr), []byte(h.cfg.APIKey)) == 1 {
+				machineName := "machine"
+				_, _ = h.store.UpsertUser(r.Context(), machineName, &machineName)
+				ctx := context.WithValue(r.Context(), UserKey, UserInfo{
+					Username:    machineName,
+					DisplayName: "Machine Client",
+					Source:      "api-key",
+				})
+				next.ServeHTTP(w, r.WithContext(ctx))
+				return
+			}
+
+			// Fall back to JWT validation
 			user, err := h.validateJWT(tokenStr)
 			if err == nil {
 				ctx := context.WithValue(r.Context(), UserKey, *user)
